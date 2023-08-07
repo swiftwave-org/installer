@@ -1,11 +1,12 @@
 # swiftwave should be stack name
 version: '3'
 services:
-  server:
+  app:
     image: "ghcr.io/swiftwave-org/swiftwave:latest"
     volumes:
-      - /home/ubuntu/app/backup:/data
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${SWIFTWAVE_APP_FOLDER}:/data:rw
+      - ${SWIFTWAVE_APP_TARBALL_FOLDER}:/data/tarball:rw
+      - /var/run/docker.sock:/var/run/docker.sock:rw
     deploy:
       mode: global
       placement:
@@ -21,17 +22,17 @@ services:
       - "1.1.1.1"
     environment:
       - PORT=3333
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=JDJhJDE2JHh6VEVLTm9IVldpdm9TemlMWjZhNGU2eldVV0d3RlpNYXc5eFBRNDZHaFF6SDlxcktIZkND
+      - ADMIN_USERNAME=${SWIFTWAVE_ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${SWIFTWAVE_ADMIN_PASSWORD_HASH}
       - CODE_TARBALL_DIR=/data/tarball
-      - SWARM_NETWORK=swiftwave_swarm_network
+      - SWARM_NETWORK=${SWARM_NETWORK}
       - HAPROXY_SERVICE_NAME=swiftwave_haproxy
       - DATABASE_TYPE=sqlite
       - SQLITE_DATABASE=/data/gorm.db
       - POSTGRESQL_URI=
       - REDIS_ADDRESS=swiftwave_redis:6379
       - REDIS_PASSWORD=
-      - ACCOUNT_EMAIL_ID=test@gmail.com
+      - ACCOUNT_EMAIL_ID=${SWIFTWAVE_ADMIN_EMAIL}
       - ACCOUNT_PRIVATE_KEY_FILE_PATH=/data/account_private_key.key
       - HAPROXY_MANAGER_HOST=swiftwave_haproxy
       - HAPROXY_MANAGER_PORT=5555
@@ -48,7 +49,7 @@ services:
   haproxy:
     image: "haproxytech/haproxy-debian:2.9"
     volumes:
-      - /home/ubuntu/app/haproxy:/usr/local/etc/haproxy
+      - ${SWIFTWAVE_HAPROXY_FOLDER}:/usr/local/etc/haproxy:rw
     deploy:
       mode: global
       placement:
@@ -61,7 +62,7 @@ services:
     image: "redis:alpine"
     command: sh -c "redis-server --appendonly yes"
     volumes:
-      - /home/ubuntu/app/redis_data:/data
+      - ${SWIFTWAVE_REDIS_FOLDER}:/data:rw
     deploy:
       mode: global
       placement:
