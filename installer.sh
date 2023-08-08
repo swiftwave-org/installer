@@ -4,6 +4,11 @@
 repo_url="https://github.com/swiftwave-org/installer/archive/refs/heads/main.zip"
 installer_path="$PWD/swiftwave-installer"
 
+# Remove existing swiftwave-installer directory
+if [ -d "$installer_path" ]; then
+    rm -rf $installer_path &> /dev/null
+fi
+
 # Check for `unzip` command
 if ! command -v unzip &> /dev/null
 then
