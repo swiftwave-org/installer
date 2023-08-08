@@ -35,4 +35,4 @@ rm -rf installer-main
 # Run setup script
 echo "Starting ..."
 sudo chmod +x setup.sh
-./setup.sh
+bash -c "./setup.sh"
