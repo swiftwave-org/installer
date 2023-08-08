@@ -23,6 +23,10 @@ rm installer.zip
 # Change directory to swiftwave-installer
 cd $installer_path
 
+# Move everything from `installer-main` to current directory
+mv installer-main/* .
+rm -rf installer-main
+
 # Run setup script
 echo "Starting ..."
 sudo chmod +x setup.sh
