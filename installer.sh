@@ -6,7 +6,7 @@ installer_path="$PWD/swiftwave-installer"
 
 # Remove existing swiftwave-installer directory
 if [ -d "$installer_path" ]; then
-    rm -rf $installer_path &> /dev/null
+    sudo rm -rf $installer_path &> /dev/null
 fi
 
 # Check for `unzip` command
