@@ -9,6 +9,15 @@ if [ -d "$installer_path" ]; then
     sudo rm -rf $installer_path &> /dev/null
 fi
 
+# Check for `wget` command
+if ! command -v wget &> /dev/null
+then
+    echo "wget command could not be found"
+    echo "Installing wget..."
+    sudo apt update -y
+    sudo apt install -y wget
+fi
+
 # Check for `unzip` command
 if ! command -v unzip &> /dev/null
 then
