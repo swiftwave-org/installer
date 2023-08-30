@@ -4,25 +4,41 @@ STACK_NAME="swiftwave"
 SWARM_NETWORK="swarm_network"
 SWIFTWAVE_FOLDER="$HOME/swiftwave"
 
+if [[ $ENVIRONMENT == "" ]]
+then
+    export ENVIRONMENT="production"
+fi
+
 # Functions
 
 # Check already installation
 check_already_installed() {
     if [ -d "$SWIFTWAVE_FOLDER" ]; then
-        echo "Swiftwave is already installed."
-        read -p "Do you like to reinstall swiftwave? (y/n) " reinstall_choice
-        # if yes, delete swiftwave folder
-        if [ "$reinstall_choice" = "y" ]; then
-            echo "Deleting swiftwave folder..."
+        if [[ $ENVIRONMENT == "production" ]]
+        then
+            echo "Swiftwave is already installed."
+            read -p "Do you like to reinstall swiftwave? (y/n) " reinstall_choice
+            # if yes, delete swiftwave folder
+            if [ "$reinstall_choice" = "y" ]; then
+                echo "Deleting swiftwave folder..."
+                sudo rm -rf "$SWIFTWAVE_FOLDER"
+                echo "Swiftwave folder deleted successfully"
+                echo "Deleting docker stack..."
+                sudo docker stack rm $STACK_NAME &> /dev/null 2>&1
+                echo "Docker stack deleted successfully"
+                echo "Waiting for 30 seconds..."
+                sleep 30
+            else
+                echo "Exiting..."
+                exit 1
+            fi
+        elif [[ $ENVIRONMENT == "staging" ]]
+        then
             sudo rm -rf "$SWIFTWAVE_FOLDER"
-            echo "Swiftwave folder deleted successfully"
-            echo "Deleting docker stack..."
             sudo docker stack rm $STACK_NAME &> /dev/null 2>&1
-            echo "Docker stack deleted successfully"
-            echo "Waiting for 30 seconds..."
             sleep 30
         else
-            echo "Exiting..."
+            echo "Wrong environment selected."
             exit 1
         fi
     fi
@@ -54,7 +70,7 @@ install_docker() {
     echo "Docker is not installed. Install docker : https://docs.docker.com/engine/install/"
     read -p "Do you like to install docker? (y/n) " install_docker_choice
     # if yes, install docker
-    if [ "$install_docker_choice" = "y" ]; then
+    if [[ "$install_docker_choice" = "y" || "$ENVIRONMENT" == "staging" ]]; then
         echo "Installing docker..."
         sudo apt update -y
         sudo apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
@@ -143,31 +159,43 @@ mkdir "$SWIFTWAVE_HAPROXY_FOLDER/ssl"
 # as haproxy ssl_sni is enabled, without atleast one pem file, haproxy will not start
 generate_pem_file "$SWIFTWAVE_HAPROXY_FOLDER/ssl/default.pem"
 
-# Take admin username and password
-while true; do
-    echo "This e-mail id will be used to used in requesting SSL certificate from Let's Encrypt, So make sure this email id is valid and you have access to it."
-    read -p "Enter admin email : " admin_email
-    read -p "Enter admin username : " admin_username
-    read -p "Enter admin password : " admin_password
+if [[ "$ENVIRONMENT" == "production" ]]
+then
+    # Take admin username and password
+    while true; do
+        echo "This e-mail id will be used to used in requesting SSL certificate from Let's Encrypt, So make sure this email id is valid and you have access to it."
+        read -p "Enter admin email : " admin_email
+        read -p "Enter admin username : " admin_username
+        read -p "Enter admin password : " admin_password
 
-    # Check if admin email is empty
-    if [ -z "$admin_email" ]; then
-        echo "Admin email cannot be empty"
-        continue
-    fi
+        # Check if admin email is empty
+        if [ -z "$admin_email" ]; then
+            echo "Admin email cannot be empty"
+            continue
+        fi
 
-    # Check if admin username is empty
-    if [ -z "$admin_username" ]; then
-        echo "Admin username cannot be empty"
-        continue
-    fi
-    # Check if admin password is empty
-    if [ -z "$admin_password" ]; then
-        echo "Admin password cannot be empty"
-        continue
-    fi
-    break
-done
+        # Check if admin username is empty
+        if [ -z "$admin_username" ]; then
+            echo "Admin username cannot be empty"
+            continue
+        fi
+        # Check if admin password is empty
+        if [ -z "$admin_password" ]; then
+            echo "Admin password cannot be empty"
+            continue
+        fi
+        break
+    done
+elif [[ "$ENVIRONMENT" == "staging" ]]
+then
+    admin_email="test@gmail.com"
+    admin_username="admin"
+    admin_password="admin"
+else
+    echo "Wrong environment selected."
+    exit 1
+fi
+
 
 # Generate brypt hash of admin password
 admin_password_hash=$(htpasswd -bnBC 8 "" "$admin_password"  | grep -oP '\$2[ayb]\$.{56}' | base64 -w 0)
@@ -193,10 +221,13 @@ docker_compose_yml=$(echo "$docker_compose_yml" | sed "s|\${SWARM_NETWORK}|$SWAR
 
 # Read IP address of current node
 ip_address=$(curl --silent https://api64.ipify.org/)
-echo "Public IP of current node is $ip_address"
-read -p "Are you sure this is the correct IP address of current node? (y/n) " choice
-if [ "$choice" != "y" ]; then
-    read -p "Enter IP address of current node : " ip_address
+if [[ "$ENVIRONMENT" == "production" ]]
+then
+    echo "Public IP of current node is $ip_address"
+    read -p "Are you sure this is the correct IP address of current node? (y/n) " choice
+    if [ "$choice" != "y" ]; then
+        read -p "Enter IP address of current node : " ip_address
+    fi
 fi
 
 # Read haproxy.cfg
