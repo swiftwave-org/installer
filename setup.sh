@@ -235,7 +235,16 @@ then
 fi
 
 # Read haproxy.cfg
-haproxy_cfg=$(cat haproxy.cfg)
+if [ "$ENVIRONMENT" = "production" ]
+then
+    haproxy_cfg=$(cat haproxy.cfg)
+elif [ "$ENVIRONMENT" = "staging" ]
+then
+    haproxy_cfg=$(cat haproxy.staging.cfg)
+else
+    echo "Wrong environment selected."
+    exit 1
+fi
 
 # Use sed to replace env variables in haproxy.cfg
 haproxy_cfg=$(echo "$haproxy_cfg" | sed "s|\${PUBLIC_IP}|$ip_address|g")
