@@ -68,9 +68,13 @@ generate_pem_file() {
 # Install docker
 install_docker() {
     echo "Docker is not installed. Install docker : https://docs.docker.com/engine/install/"
-    read -p "Do you like to install docker? (y/n) " install_docker_choice
+    if [[ "$ENVIRONMENT" == "production" ]]
+    then
+        read -p "Do you like to install docker? (y/n) " install_docker_choice
+    fi
+
     # if yes, install docker
-    if [[ "$install_docker_choice" = "y" || "$ENVIRONMENT" == "staging" ]]; then
+    if [[ "$ENVIRONMENT" == "staging" || "$install_docker_choice" = "y" ]]; then
         echo "Installing docker..."
         sudo apt update -y
         sudo apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
