@@ -93,7 +93,7 @@ install_docker() {
 # Start
 
 # User should run as non root user
-if [ "$EUID" -eq 0 ]; then
+if [[ "$EUID" -eq 0 ]]; then
     echo "Please run as non-root user [without sudo]"
     exit 1
 fi
