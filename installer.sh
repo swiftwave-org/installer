@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 
 repo_url="https://github.com/swiftwave-org/installer/archive/refs/heads/main.zip"
