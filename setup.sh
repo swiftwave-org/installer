@@ -4,7 +4,7 @@ STACK_NAME="swiftwave"
 SWARM_NETWORK="swarm_network"
 SWIFTWAVE_FOLDER="$HOME/swiftwave"
 
-if [[ $ENVIRONMENT == "" ]]
+if [ "$ENVIRONMENT" = "" ]
 then
     export ENVIRONMENT="production"
 fi
@@ -14,7 +14,7 @@ fi
 # Check already installation
 check_already_installed() {
     if [ -d "$SWIFTWAVE_FOLDER" ]; then
-        if [[ $ENVIRONMENT == "production" ]]
+        if [ "$ENVIRONMENT" = "production" ]
         then
             echo "Swiftwave is already installed."
             read -p "Do you like to reinstall swiftwave? (y/n) " reinstall_choice
@@ -32,7 +32,7 @@ check_already_installed() {
                 echo "Exiting..."
                 exit 1
             fi
-        elif [[ $ENVIRONMENT == "staging" ]]
+        elif [ "$ENVIRONMENT" = "staging" ]
         then
             sudo rm -rf "$SWIFTWAVE_FOLDER"
             sudo docker stack rm $STACK_NAME &> /dev/null 2>&1
@@ -68,13 +68,13 @@ generate_pem_file() {
 # Install docker
 install_docker() {
     echo "Docker is not installed. Install docker : https://docs.docker.com/engine/install/"
-    if [[ "$ENVIRONMENT" == "production" ]]
+    if [ "$ENVIRONMENT" = "production" ]
     then
         read -p "Do you like to install docker? (y/n) " install_docker_choice
     fi
 
     # if yes, install docker
-    if [[ "$ENVIRONMENT" == "staging" || "$install_docker_choice" = "y" ]]; then
+    if [ "$ENVIRONMENT" = "staging" ] || [ "$install_docker_choice" = "y" ]; then
         echo "Installing docker..."
         sudo apt update -y
         sudo apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
@@ -163,7 +163,7 @@ mkdir "$SWIFTWAVE_HAPROXY_FOLDER/ssl"
 # as haproxy ssl_sni is enabled, without atleast one pem file, haproxy will not start
 generate_pem_file "$SWIFTWAVE_HAPROXY_FOLDER/ssl/default.pem"
 
-if [[ "$ENVIRONMENT" == "production" ]]
+if [ "$ENVIRONMENT" = "production" ]
 then
     # Take admin username and password
     while true; do
@@ -190,7 +190,7 @@ then
         fi
         break
     done
-elif [[ "$ENVIRONMENT" == "staging" ]]
+elif [ "$ENVIRONMENT" = "staging" ]
 then
     admin_email="test@gmail.com"
     admin_username="admin"
@@ -225,7 +225,7 @@ docker_compose_yml=$(echo "$docker_compose_yml" | sed "s|\${SWARM_NETWORK}|$SWAR
 
 # Read IP address of current node
 ip_address=$(curl --silent https://api64.ipify.org/)
-if [[ "$ENVIRONMENT" == "production" ]]
+if [ "$ENVIRONMENT" = "production" ]
 then
     echo "Public IP of current node is $ip_address"
     read -p "Are you sure this is the correct IP address of current node? (y/n) " choice
