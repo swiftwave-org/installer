@@ -44,4 +44,10 @@ rm -rf installer-main
 # Run setup script
 echo "Starting ..."
 sudo chmod +x setup.sh
-bash -c "./setup.sh < /dev/tty0"
+if sh -c ": >/dev/tty" >/dev/null 2>/dev/null; then
+    # /dev/tty is available and usable
+    bash -c "./setup.sh < /dev/tty"
+else
+    # /dev/tty is not available
+    bash -c "./setup.sh"
+fi
