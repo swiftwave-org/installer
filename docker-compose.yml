@@ -59,10 +59,11 @@ services:
       - swarm_network
       - controlplane_network
   redis:
-    image: "redis:alpine"
-    command: sh -c "redis-server --appendonly yes"
+    image: "bitnami/redis:6.2.13-debian-11-r71"
     volumes:
-      - ${SWIFTWAVE_REDIS_FOLDER}:/data:rw
+      - ${SWIFTWAVE_REDIS_FOLDER}:/bitnami/redis/data:rw
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
     deploy:
       mode: global
       placement:
