@@ -287,3 +287,8 @@ sudo docker stack deploy -c docker-compose-raw.yml $STACK_NAME
 
 # Clean up
 rm docker-compose-raw.yml
+
+# Display a green message about port availability
+echo -e "\e[32mDashboard is available at port 9999"
+echo "Swiftwave server is available at port 3333"
+echo -e "\e[0m"  # Reset text color to default
