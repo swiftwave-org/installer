@@ -9,7 +9,7 @@ services:
         constraints:
           - node.labels.swiftwave_controlplane_node==true
     ports:
-      - target: 9999
+      - target: 80
         published: 9999
         protocol: tcp
         mode: ingress
