@@ -2,30 +2,29 @@
 
 PRODUCTION_VERSION="v1.0.x-alpha"
 STAGING_VERSION="develop"
+# Set a default value for ENVIRONMENT
+ENVIRONMENT="${ENVIRONMENT:-production}"
 
 STACK_NAME="swiftwave"
 SWARM_NETWORK="swarm_network"
 SWIFTWAVE_FOLDER="$HOME/swiftwave"
 
 # Check if the ENVIRONMENT variable is set
-if [[ -n "$ENVIRONMENT" ]]; then
-  if [[ "$ENVIRONMENT" == "staging" ]]; then
-    SWIFTWAVE_VERSION="$STAGING_VERSION"
-  elif [[ "$ENVIRONMENT" == "production" ]]; then
-    SWIFTWAVE_VERSION="$PRODUCTION_VERSION"
-  else
-    echo "Unknown environment: $ENVIRONMENT"
-    exit 1
-  fi
-else
-  echo "ENVIRONMENT variable not set. Using default PRODUCTION_VERSION."
+if [[ "$ENVIRONMENT" == "staging" ]]; then
+  SWIFTWAVE_VERSION="$STAGING_VERSION"
+elif [[ "$ENVIRONMENT" == "production" ]]; then
   SWIFTWAVE_VERSION="$PRODUCTION_VERSION"
+else
+  echo "Unknown environment: $ENVIRONMENT"
+  exit 1
 fi
 
 # Check if the VERSION variable is set and override SWIFTWAVE_VERSION
 if [[ -n "$VERSION" ]]; then
   SWIFTWAVE_VERSION="$VERSION"
 fi
+
+echo "SWIFTWAVE_VERSION is set to: $SWIFTWAVE_VERSION"
 
 # Functions
 
@@ -67,7 +66,6 @@ install_dependencies(){
     sudo apt update -y
     sudo apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
     sudo apt install -y openssl apache2-utils curl
-    clear
 }
 
 # Generate pem file
@@ -100,7 +98,6 @@ install_docker() {
         sudo add-apt-repository  --yes "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         sudo apt update -y
         sudo apt install -y docker-ce docker-ce-cli containerd.io
-        clear
         echo "Docker installed successfully"
     else
         echo "Docker is required to run this project. Exiting..."
