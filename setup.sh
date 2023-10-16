@@ -1,12 +1,30 @@
 #!/usr/bin/env bash
 
+PRODUCTION_VERSION="v1.0.x-alpha"
+STAGING_VERSION="develop"
+
 STACK_NAME="swiftwave"
 SWARM_NETWORK="swarm_network"
 SWIFTWAVE_FOLDER="$HOME/swiftwave"
 
-if [ "$ENVIRONMENT" = "" ]
-then
-    export ENVIRONMENT="production"
+# Check if the ENVIRONMENT variable is set
+if [[ -n "$ENVIRONMENT" ]]; then
+  if [[ "$ENVIRONMENT" == "staging" ]]; then
+    SWIFTWAVE_VERSION="$STAGING_VERSION"
+  elif [[ "$ENVIRONMENT" == "production" ]]; then
+    SWIFTWAVE_VERSION="$PRODUCTION_VERSION"
+  else
+    echo "Unknown environment: $ENVIRONMENT"
+    exit 1
+  fi
+else
+  echo "ENVIRONMENT variable not set. Using default PRODUCTION_VERSION."
+  SWIFTWAVE_VERSION="$PRODUCTION_VERSION"
+fi
+
+# Check if the VERSION variable is set and override SWIFTWAVE_VERSION
+if [[ -n "$VERSION" ]]; then
+  SWIFTWAVE_VERSION="$VERSION"
 fi
 
 # Functions
@@ -213,6 +231,7 @@ SWIFTWAVE_ADMIN_PASSWORD_HASH="$admin_password_hash"
 docker_compose_yml=$(cat docker-compose.yml)
 
 # Use sed to replace env variables in docker-compose.yml
+docker_compose_yml=$(echo "$docker_compose_yml" | sed "s|\${SWIFTWAVE_VERSION}|$SWIFTWAVE_VERSION|g")
 docker_compose_yml=$(echo "$docker_compose_yml" | sed "s|\${SWIFTWAVE_APP_FOLDER}|$SWIFTWAVE_APP_FOLDER|g")
 docker_compose_yml=$(echo "$docker_compose_yml" | sed "s|\${SWIFTWAVE_APP_TARBALL_FOLDER}|$SWIFTWAVE_APP_TARBALL_FOLDER|g")
 docker_compose_yml=$(echo "$docker_compose_yml" | sed "s|\${SWIFTWAVE_REDIS_FOLDER}|$SWIFTWAVE_REDIS_FOLDER|g")

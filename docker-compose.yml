@@ -1,8 +1,20 @@
 # swiftwave should be stack name
 version: '3.5'
 services:
+  dashboard:
+    image: "ghcr.io/swiftwave-org/dashboard:${SWIFTWAVE_VERSION}"
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.labels.swiftwave_controlplane_node==true
+    ports:
+      - target: 9999
+        published: 9999
+        protocol: tcp
+        mode: ingress
   app:
-    image: "ghcr.io/swiftwave-org/swiftwave:latest"
+    image: "ghcr.io/swiftwave-org/swiftwave:${SWIFTWAVE_VERSION}"
     volumes:
       - ${SWIFTWAVE_APP_FOLDER}:/data:rw
       - ${SWIFTWAVE_APP_TARBALL_FOLDER}:/data/tarball:rw
@@ -39,7 +51,7 @@ services:
       - HAPROXY_MANAGER_USERNAME=admin
       - HAPROXY_MANAGER_PASSWORD=mypassword
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - RESTRICTED_PORTS=80,443,5555,3333
+      - RESTRICTED_PORTS=80,443,5555,3333,9999
       - SESSION_TOKEN_EXPIRY_MINUTES=60
     depends_on:
       - haproxy
